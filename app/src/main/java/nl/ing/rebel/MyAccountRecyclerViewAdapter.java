@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import nl.ing.rebel.AccountFragment.OnListFragmentInteractionListener;
 import nl.ing.rebel.dummy.DummyContent.DummyItem;
+import nl.ing.rebel.models.Account;
 
 import java.util.List;
 
@@ -19,10 +20,10 @@ import java.util.List;
  */
 public class MyAccountRecyclerViewAdapter extends RecyclerView.Adapter<MyAccountRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<Account> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyAccountRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public MyAccountRecyclerViewAdapter(List<Account> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -37,8 +38,8 @@ public class MyAccountRecyclerViewAdapter extends RecyclerView.Adapter<MyAccount
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.mIdView.setText(mValues.get(position).getIban());
+        holder.mContentView.setText(mValues.get(position).getBalance());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,7 +62,7 @@ public class MyAccountRecyclerViewAdapter extends RecyclerView.Adapter<MyAccount
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public DummyItem mItem;
+        public Account mItem;
 
         public ViewHolder(View view) {
             super(view);

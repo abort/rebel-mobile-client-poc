@@ -1,7 +1,9 @@
 package nl.ing.rebel;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,10 +12,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+
+import lombok.extern.java.Log;
+import lombok.val;
 import nl.ing.rebel.dummy.DummyContent;
 import nl.ing.rebel.dummy.DummyContent.DummyItem;
+import nl.ing.rebel.models.Account;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * A fragment representing a list of Items.
@@ -21,6 +35,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
+@Log
 public class AccountFragment extends Fragment {
 
     // TODO: Customize parameter argument names
@@ -28,6 +43,10 @@ public class AccountFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+
+    private MyAccountRecyclerViewAdapter adapter = null;
+
+    private final List<Account> collectedAccounts = new LinkedList<>();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -53,6 +72,8 @@ public class AccountFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+
+        new HttpRequestTask().execute();
     }
 
     @Override
@@ -69,9 +90,39 @@ public class AccountFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyAccountRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+
+            // TODO: rest request for accounts
+            adapter = new MyAccountRecyclerViewAdapter(collectedAccounts, mListener);
+            recyclerView.setAdapter(adapter);
         }
         return view;
+    }
+
+    private class HttpRequestTask extends AsyncTask<Void, Void, Collection<Account>> {
+        @Override
+        protected Collection<Account> doInBackground(Void... parameters) {
+            try {
+                val url = "http://localhost:8080/account";
+                val restTemplate = new RestTemplate();
+                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+                ResponseEntity<List<Account>> accountResponse =
+                        restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<Account>>() {
+                        });
+                return accountResponse.getBody();
+            }
+            catch (Exception e) {
+                log.log(Level.WARNING, "Could not request accounts", e);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Collection<Account> accounts) {
+            if (accounts == null) return;
+
+            collectedAccounts.addAll(accounts);
+            if (adapter != null) adapter.notifyDataSetChanged();
+        }
     }
 
 
@@ -104,6 +155,6 @@ public class AccountFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(Account item);
     }
 }

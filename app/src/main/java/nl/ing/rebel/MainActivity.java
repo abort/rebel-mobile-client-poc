@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import nl.ing.rebel.dummy.DummyContent;
+import nl.ing.rebel.models.Account;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AccountFragment.OnListFragmentInteractionListener {
     @Override
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+    public void onListFragmentInteraction(Account item) {
 
     }
 
