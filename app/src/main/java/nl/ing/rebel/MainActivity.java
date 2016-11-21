@@ -20,10 +20,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.FrameLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.val;
 import nl.ing.rebel.dummy.DummyContent;
 import nl.ing.rebel.models.Account;
+import nl.ing.rebel.screens.TransitionFragment;
+import nl.ing.rebel.screens.TransitionOverviewFragment;
+import nl.ing.rebel.transitions.AccountTransitions;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AccountFragment.OnListFragmentInteractionListener {
     @Override
@@ -36,20 +49,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private FrameLayout mContainer;
+    private FragmentManager fragmentManager;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    private ViewPager mViewPager;
+    private class MenuSelectedListener implements TabLayout.OnTabSelectedListener {
+        private final Map<Integer, Fragment> fragments = new HashMap<Integer, Fragment>();
+
+        public MenuSelectedListener() {
+            val f = new TransitionOverviewFragment();
+            f.setTransitions(new AccountTransitions());
+            fragments.put(0, f);
+            fragments.put(1, PlaceholderFragment.newInstance(1));
+            fragments.put(2, PlaceholderFragment.newInstance(2));
+        }
+
+        @Override
+        public void onTabSelected(TabLayout.Tab tab) {
+            val m = getSupportFragmentManager();
+            m.beginTransaction().replace(R.id.container, fragments.get(tab.getPosition())).commit();
+        }
+
+        @Override
+        public void onTabUnselected(TabLayout.Tab tab) {
+
+        }
+
+        @Override
+        public void onTabReselected(TabLayout.Tab tab) {
+
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,26 +87,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mContainer = (FrameLayout) findViewById(R.id.container);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        tabLayout.addTab(tabLayout.newTab().setText("Accounts"), 0);
+        tabLayout.addTab(tabLayout.newTab().setText("Transactions"), 1);
+        tabLayout.addTab(tabLayout.newTab().setText("Info"), 2);
+        tabLayout.addOnTabSelectedListener(new MenuSelectedListener());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fragmentManager = getSupportFragmentManager();
 
+        val f = new TransitionOverviewFragment();
+        f.setTransitions(new AccountTransitions());
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.container, f);
+        fragmentTransaction.commit();
     }
 
 
@@ -139,43 +165,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            switch (position) {
-                case 1: return new AccountFragment();
-                default: return PlaceholderFragment.newInstance(position);
-            }
-        }
-
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 3;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "Accounts";
-                case 1:
-                    return "Transactions";
-                case 2:
-                    return "Info";
-            }
-            return null;
-        }
-    }
 }
