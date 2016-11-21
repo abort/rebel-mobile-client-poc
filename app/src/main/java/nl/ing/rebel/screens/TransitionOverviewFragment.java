@@ -4,12 +4,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,9 +19,7 @@ import java.util.Map;
 
 import lombok.Setter;
 import lombok.val;
-import nl.ing.rebel.MainActivity;
 import nl.ing.rebel.R;
-import nl.ing.rebel.transitions.AccountTransitions;
 import nl.ing.rebel.transitions.Transition;
 import nl.ing.rebel.transitions.Transitions;
 
@@ -61,6 +60,7 @@ public class TransitionOverviewFragment extends Fragment {
         val v = (LinearLayout)inflater.inflate(R.layout.fragment_transitions, container, false);
         for (final val t : list) {
             val b = new Button(getContext());
+            b.setAllCaps(false);
             b.setText(t.getSimpleName());
             b.setOnClickListener(new View.OnClickListener() {
                 @Override

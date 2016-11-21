@@ -11,12 +11,15 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import nl.ing.rebel.annotations.Final;
+import nl.ing.rebel.annotations.Initial;
 
 /**
  * Created by jorryt on 18/11/16.
  */
 
 public class AccountTransitions extends Transitions {
+    @Initial
     public static class Open extends Transition {
         public Integer id;
         public Money initialDeposit;
@@ -33,6 +36,7 @@ public class AccountTransitions extends Transitions {
         public Money amount;
     }
 
+    @Final
     public static class Close extends Transition {
         public Integer id;
     }
