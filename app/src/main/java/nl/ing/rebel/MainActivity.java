@@ -22,6 +22,7 @@ import lombok.val;
 import nl.ing.rebel.screens.PlaceholderFragment;
 import nl.ing.rebel.screens.TransitionOverviewFragment;
 import nl.ing.rebel.transitions.AccountTransitions;
+import nl.ing.rebel.transitions.TransactionTransitions;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     @Override
@@ -38,8 +39,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public MenuSelectedListener() {
             val f = new TransitionOverviewFragment();
             f.setTransitions(new AccountTransitions());
+            val x = new TransitionOverviewFragment();
+            x.setTransitions(new TransactionTransitions());
             fragments.put(0, f);
-            fragments.put(1, PlaceholderFragment.newInstance(1));
+            fragments.put(1, x);
             fragments.put(2, PlaceholderFragment.newInstance(2));
         }
 

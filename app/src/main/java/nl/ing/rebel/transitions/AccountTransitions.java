@@ -14,10 +14,6 @@ import lombok.ToString;
 import nl.ing.rebel.annotations.Final;
 import nl.ing.rebel.annotations.Initial;
 
-/**
- * Created by jorryt on 18/11/16.
- */
-
 public class AccountTransitions extends Transitions {
     @Initial
     public static class Open extends Transition {
