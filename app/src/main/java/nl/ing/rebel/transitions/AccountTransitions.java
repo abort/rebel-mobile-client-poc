@@ -15,28 +15,28 @@ import nl.ing.rebel.annotations.Final;
 import nl.ing.rebel.annotations.Initial;
 import nl.ing.rebel.annotations.RestEndPoint;
 
-@RestEndPoint(url = "http://10.0.2.2:8080/Account/{id}/")
+@RestEndPoint(url = "http://10.0.2.2:8080/Account/{iban}/")
 public class AccountTransitions extends Transitions {
     @Initial
     public static class OpenAccount extends Transition {
-        public String id;
+        public String iban;
         //public String IBAN;
         public Money initialDeposit;
     }
 
     public static class Withdraw extends Transition {
-        public Integer id;
+        public Integer iban;
         public Money amount;
     }
 
 
     public static class Deposit extends Transition {
-        public Integer id;
+        public Integer iban;
         public Money amount;
     }
 
     @Final
     public static class Close extends Transition {
-        public Integer id;
+        public Integer iban;
     }
 }
