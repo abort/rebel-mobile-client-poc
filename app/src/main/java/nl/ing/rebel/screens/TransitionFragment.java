@@ -37,6 +37,7 @@ import lombok.val;
 import nl.ing.rebel.R;
 import nl.ing.rebel.models.Account;
 import nl.ing.rebel.transitions.Transition;
+import nl.ing.rebel.transitions.Transitions;
 
 import static android.content.ContentValues.TAG;
 
@@ -48,6 +49,18 @@ public class TransitionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setRetainInstance(true);
+
+        if (savedInstanceState == null) return;
+        val storedTransitions = savedInstanceState.getParcelable("class");
+        if (storedTransitions != null) transition = (Transition)storedTransitions;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable("class", transition);
     }
 
     @Override

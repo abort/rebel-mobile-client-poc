@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -32,6 +33,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private FrameLayout mContainer;
     private FragmentManager fragmentManager;
+    private int selectedTab;
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("selectedTab", selectedTab);
+
+        // store current fragment.... to restore it later
+    }
 
     private class MenuSelectedListener implements TabLayout.OnTabSelectedListener {
         private final Map<Integer, Fragment> fragments = new HashMap<Integer, Fragment>();
@@ -49,17 +60,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
             val m = getSupportFragmentManager();
-            m.beginTransaction().replace(R.id.container, fragments.get(tab.getPosition())).commit();
+            val uniqueFragment = fragments.get(tab.getPosition());
+            m.beginTransaction().replace(R.id.container, uniqueFragment).commit();
+            selectedTab = tab.getPosition();
         }
 
         @Override
-        public void onTabUnselected(TabLayout.Tab tab) {
-
-        }
+        public void onTabUnselected(TabLayout.Tab tab) { }
 
         @Override
         public void onTabReselected(TabLayout.Tab tab) {
-
         }
     }
 
@@ -78,13 +88,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabLayout.addTab(tabLayout.newTab().setText("Accounts"), 0);
         tabLayout.addTab(tabLayout.newTab().setText("Transactions"), 1);
         tabLayout.addTab(tabLayout.newTab().setText("Info"), 2);
-        tabLayout.addOnTabSelectedListener(new MenuSelectedListener());
 
         fragmentManager = getSupportFragmentManager();
+        if (savedInstanceState != null) {
+            selectedTab = savedInstanceState.getInt("selectedTab");
+            tabLayout.getTabAt(selectedTab).select();
+            System.out.println("Select tab: " + selectedTab);
+            tabLayout.addOnTabSelectedListener(new MenuSelectedListener());
+            return;
+        }
+        tabLayout.addOnTabSelectedListener(new MenuSelectedListener());
 
+
+        // Initial code
+        val fragmentTransaction = fragmentManager.beginTransaction();
         val f = new TransitionOverviewFragment();
         f.setTransitions(new AccountTransitions());
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.container, f);
         fragmentTransaction.commit();
     }

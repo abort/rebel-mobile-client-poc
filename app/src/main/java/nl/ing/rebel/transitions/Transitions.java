@@ -1,5 +1,7 @@
 package nl.ing.rebel.transitions;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -15,7 +17,47 @@ import nl.ing.rebel.annotations.Initial;
  * Created by jorryt on 18/11/16.
  */
 
-public abstract class Transitions {
+public abstract class Transitions implements Parcelable {
+    // TODO: use parcel
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(getClass().getName());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<Transitions> CREATOR
+            = new Parcelable.Creator<Transitions>() {
+        public Transitions createFromParcel(Parcel in) {
+            return fromParcel(in);
+        }
+
+        public Transitions[] newArray(int size) {
+            return new Transitions[size];
+        }
+    };
+
+    public static Transitions fromParcel(Parcel p) {
+        val className = p.readString();
+
+        try {
+            return ((Class<? extends Transitions>)Transitions.class.getClassLoader().loadClass(className)).newInstance();
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public List<Class<? extends Transition>> getTransitions() {
         val list = new LinkedList<Class<? extends Transition>>();
         val classes = (Class<? extends Transition>[])getClass().getDeclaredClasses();

@@ -29,12 +29,20 @@ import nl.ing.rebel.transitions.Transitions;
 
 public class TransitionOverviewFragment extends Fragment {
     @Setter private Transitions transitions;
-    private List<Transition> transitionList = new LinkedList<>();
-    private Map<Button, Transition> buttonTransitionMap = new HashMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState == null) return;
+        val storedTransitions = savedInstanceState.getParcelable("class");
+        if (storedTransitions != null) transitions = (Transitions)storedTransitions;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable("class", transitions);
     }
 
     @Nullable
@@ -42,7 +50,7 @@ public class TransitionOverviewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (transitions == null) throw new RuntimeException("Transitions not set!");
         val list = transitions.getTransitions();
-        for (val t : list) {
+/*        for (val t : list) {
             try {
                 transitionList.add(t.newInstance());
             }
@@ -53,7 +61,7 @@ public class TransitionOverviewFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-
+*/
         // TODO create awesome view
 
         final val currentFragmentManager = getActivity().getSupportFragmentManager();
