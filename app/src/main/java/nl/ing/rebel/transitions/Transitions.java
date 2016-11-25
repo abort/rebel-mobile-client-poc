@@ -12,11 +12,13 @@ import java.util.List;
 import lombok.val;
 import nl.ing.rebel.annotations.Final;
 import nl.ing.rebel.annotations.Initial;
+import nl.ing.rebel.annotations.RestEndPoint;
 
 /**
  * Created by jorryt on 18/11/16.
  */
 
+@RestEndPoint(url = "")
 public abstract class Transitions implements Parcelable {
     // TODO: use parcel
     @Override
@@ -56,6 +58,10 @@ public abstract class Transitions implements Parcelable {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String getRestEndpointBase() {
+        return getClass().getAnnotation(RestEndPoint.class).url();
     }
 
     public List<Class<? extends Transition>> getTransitions() {

@@ -16,16 +16,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +50,7 @@ public class TransitionFragment extends Fragment {
     @Setter private Transition transition;
     private Gson gson = new Gson();
     private Map<String, EditText> textBoxes = new HashMap<>();
+    private String restEndPoint = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,17 +61,23 @@ public class TransitionFragment extends Fragment {
         if (savedInstanceState == null) return;
         val storedTransitions = savedInstanceState.getParcelable("class");
         if (storedTransitions != null) transition = (Transition)storedTransitions;
+        val baseURL = (String)savedInstanceState.get("baseURL");
+        if (baseURL != null) restEndPoint = baseURL;
     }
 
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelable("class", transition);
+        outState.putString("baseURL", restEndPoint);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
        //super.onCreateView(inflater, container, savedInstanceState);
+        val args = getArguments();
+        if (args.containsKey("baseURL"))
+            restEndPoint = args.getString("baseURL");
 
         val top = (LinearLayout)inflater.inflate(R.layout.fragment_transition, container, false);
         val text = new TextView(getActivity());
@@ -83,14 +95,16 @@ public class TransitionFragment extends Fragment {
             textBoxes.put(p.first, e);
         }
 
+        final val endPoint = restEndPoint + transition.getClass().getSimpleName();
         val button = new Button(getActivity());
         button.setText("Post");
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("BLA", "please post: " + gson.toJson(getFilledFields()));
-
-
+                val json = gson.toJson(getFilledFields());
+                Log.d("BLA", "please post: " + json);
+                val task = new HttpRequestTask();
+                task.execute(endPoint, json, getActorId());
             }
         });
         top.addView(button);
@@ -101,6 +115,7 @@ public class TransitionFragment extends Fragment {
     private Map<String, Map<String, String>> getFilledFields() {
         final Map<String, String> map = new HashMap<>();
         for (val e : textBoxes.entrySet()) {
+            if ("id".equals(e.getKey())) continue;
             map.put(e.getKey(), e.getValue().getText().toString());
         }
 
@@ -109,29 +124,37 @@ public class TransitionFragment extends Fragment {
         return wrapper;
     }
 
-    private class HttpRequestTask extends AsyncTask<Void, Void, String> {
+    public String getActorId() {
+        return textBoxes.get("id").getText().toString();
+    }
+
+    private class HttpRequestTask extends AsyncTask<String, Void, String> {
         @Override
-        protected String doInBackground(Void... parameters) {
+        protected String doInBackground(String... parameters) {
             try {
-                val url = "http://localhost:8080/account/" + parameters[0];
+                val endPoint = parameters[0].replace("{id}", parameters[2]);
+                Log.i("TAG", "Executing: " + endPoint);
+                val requestHeaders = new HttpHeaders();
+                requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+                val requestEntity = new HttpEntity<String>(parameters[1], requestHeaders);
+
+                Log.i("HTTP", "Sending json request to " + endPoint + ":\n" + requestEntity.getBody());
+
                 val restTemplate = new RestTemplate();
-                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                ResponseEntity<String> accountResponse =
-                        restTemplate.exchange(url, HttpMethod.POST, null, new ParameterizedTypeReference<String>() {
-                        });
+                // restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+                val accountResponse = restTemplate.exchange(endPoint, HttpMethod.POST, requestEntity, String.class);
                 return accountResponse.getBody();
             }
             catch (Exception e) {
-                System.out.println("Could not request accounts");
+                System.out.println("Could not request accounts: " + e);
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(String result) {
-            Log.d("log", "post execute: " + result);
+            if (result == null) result = "Failed/No Response";
+            Toast.makeText(getActivity(), "Post Result: " + result, Toast.LENGTH_SHORT).show();
         }
     }
-
-
 }

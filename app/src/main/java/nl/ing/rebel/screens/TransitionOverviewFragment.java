@@ -64,6 +64,8 @@ public class TransitionOverviewFragment extends Fragment {
 */
         // TODO create awesome view
 
+
+
         final val currentFragmentManager = getActivity().getSupportFragmentManager();
         val v = (LinearLayout)inflater.inflate(R.layout.fragment_transitions, container, false);
         for (final val t : list) {
@@ -76,7 +78,9 @@ public class TransitionOverviewFragment extends Fragment {
                     try {
                         val transitionFragment = new TransitionFragment();
                         transitionFragment.setTransition(t.newInstance());
-
+                        val args = new Bundle();
+                        args.putString("baseURL", transitions.getRestEndpointBase());
+                        transitionFragment.setArguments(args);
                         currentFragmentManager.beginTransaction().replace(R.id.container, transitionFragment).setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN).addToBackStack(null).commit();
                     }
                     catch (java.lang.InstantiationException e) {
