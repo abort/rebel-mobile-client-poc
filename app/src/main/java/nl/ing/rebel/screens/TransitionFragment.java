@@ -125,14 +125,16 @@ public class TransitionFragment extends Fragment {
     }
 
     public String getActorId() {
-        return textBoxes.get("iban").getText().toString();
+        // TODO generalize
+        if (textBoxes.get("id") == null) return textBoxes.get("iban").getText().toString();
+        return textBoxes.get("id").getText().toString();
     }
 
     private class HttpRequestTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... parameters) {
             try {
-                val endPoint = parameters[0].replace("{iban}", parameters[2]);
+                val endPoint = parameters[0].replace("{iban}", parameters[2]).replace("{id}", parameters[2]);
                 Log.i("TAG", "Executing: " + endPoint);
                 val requestHeaders = new HttpHeaders();
                 requestHeaders.setContentType(MediaType.APPLICATION_JSON);

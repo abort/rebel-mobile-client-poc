@@ -25,18 +25,18 @@ public class AccountTransitions extends Transitions {
     }
 
     public static class Withdraw extends Transition {
-        public Integer iban;
+        public String iban;
         public Money amount;
     }
 
 
     public static class Deposit extends Transition {
-        public Integer iban;
+        public String iban;
         public Money amount;
     }
 
     @Final
     public static class Close extends Transition {
-        public Integer iban;
+        public String iban;
     }
 }
